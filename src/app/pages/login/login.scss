@@ -177,7 +177,14 @@ form {
   }
   
 }
-
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px #2d2d2d inset !important; /* ให้พื้นหลังกลับเป็นสีเทาเข้มเหมือน input ปกติ */
+  -webkit-text-fill-color: #b0b0b0 !important; /* ให้ตัวอักษรเป็นสีเทาอ่อนตามธีม */
+  transition: background-color 5000s ease-in-out 0s;
+}
 // Responsive
 @media (max-width: 480px) {
   .login-card {

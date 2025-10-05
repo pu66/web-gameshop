@@ -1,8 +1,8 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { User, LoginResponse } from '../../model/user';
 import { AuthService } from '../../services/user';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterLink, Router } from '@angular/router';
 
@@ -14,6 +14,8 @@ import { RouterLink, Router } from '@angular/router';
   styleUrls: ['./register.scss'],
 })
 export class Register implements OnInit {
+  @ViewChild('registerForm') registerForm!: NgForm;
+
   user: Partial<User> = {};
   message: string = '';
   isError: boolean = false;
@@ -47,7 +49,6 @@ export class Register implements OnInit {
         this.message = 'กรุณาเลือกไฟล์รูปภาพเท่านั้น (jpg, jpeg, png, gif)';
         this.isError = true;
         this.cd.detectChanges();
-
         return;
       }
 
@@ -56,7 +57,6 @@ export class Register implements OnInit {
         this.message = 'ขนาดไฟล์ต้องไม่เกิน 5MB';
         this.isError = true;
         this.cd.detectChanges();
-
         return;
       }
 
@@ -81,13 +81,6 @@ export class Register implements OnInit {
       this.message = '';
       this.isError = false;
 
-      if (!this.validateForm()) {
-        this.message = 'กรุณากรอกข้อมูลให้ถูกต้องและครบถ้วน';
-        this.isError = true;
-        this.cd.detectChanges();
-        return;
-      }
-
       this.isLoading = true;
       this.cd.detectChanges();
 
@@ -103,20 +96,31 @@ export class Register implements OnInit {
       const response = await this.authService.register(formData);
       console.log('Register success:', response);
 
+      // แสดงข้อความสำเร็จ
       this.message = 'สมัครสมาชิกสำเร็จ!';
       this.isError = false;
       this.isLoading = false;
 
+      // รีเซ็ตข้อมูล
       this.user = {};
       this.selectedFile = null;
       this.previewUrl = null;
       this.errors = { username: '', email: '', password: '' };
 
+      // รีเซ็ต form state - สำคัญมาก!
+      if (this.registerForm) {
+        this.registerForm.resetForm();
+      }
+
       this.cd.detectChanges();
 
+      // Alert แจ้งเตือน
+      alert('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
+
+      // Redirect ไปหน้า login
       setTimeout(() => {
         this.router.navigate(['/login']);
-      }, 2000);
+      }, 500);
     } catch (error: any) {
       console.error('Register error:', error);
 
@@ -139,45 +143,5 @@ export class Register implements OnInit {
   removeImage(): void {
     this.selectedFile = null;
     this.previewUrl = null;
-  }
-  validateForm(): boolean {
-    this.errors = { username: '', email: '', password: '' };
-    let isValid = true;
-
-    // Validate username
-    if (!this.user.username || this.user.username.trim() === '') {
-      this.errors.username = 'กรุณากรอก Username';
-      isValid = false;
-      this.cd.detectChanges();
-    } else if (this.user.username.length < 3) {
-      this.errors.username = 'Username ต้องมีอย่างน้อย 3 ตัวอักษร';
-      isValid = false;
-      this.cd.detectChanges();
-    }
-
-    // Validate email
-    if (!this.user.email || this.user.email.trim() === '') {
-      this.errors.email = 'กรุณากรอกอีเมล';
-
-      isValid = false;
-      this.cd.detectChanges();
-    } else if (!this.validateEmail(this.user.email)) {
-      this.errors.email = 'รูปแบบอีเมลไม่ถูกต้อง';
-      isValid = false;
-      this.cd.detectChanges();
-    }
-
-    // Validate password
-    if (!this.user.password || this.user.password.trim() === '') {
-      this.errors.password = 'กรุณากรอกรหัสผ่าน';
-      isValid = false;
-      this.cd.detectChanges();
-    } else if (this.user.password.length < 4) {
-      this.errors.password = 'รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร';
-      isValid = false;
-      this.cd.detectChanges();
-    }
-
-    return isValid;
   }
 }
